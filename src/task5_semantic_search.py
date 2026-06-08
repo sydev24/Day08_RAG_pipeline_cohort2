@@ -71,7 +71,13 @@ def semantic_search(query: str, top_k: int = 10) -> list[dict]:
     if not corpus:
         return []
         
-    model = SentenceTransformer(EMBEDDING_MODEL)
+    try:
+        model = SentenceTransformer(EMBEDDING_MODEL)
+    except Exception:
+        import os
+        os.environ["HF_HUB_OFFLINE"] = "1"
+        os.environ["TRANSFORMERS_OFFLINE"] = "1"
+        model = SentenceTransformer(EMBEDDING_MODEL)
     query_embedding = model.encode(query).tolist()
     # Bước 2: Query vector store (cosine similarity)
     results = []

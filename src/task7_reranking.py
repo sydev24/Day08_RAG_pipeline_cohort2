@@ -23,7 +23,13 @@ def rerank_cross_encoder(
 
     # Khởi tạo mô hình CrossEncoder siêu nhẹ (~70MB)
     from sentence_transformers import CrossEncoder
-    model = CrossEncoder("mixedbread-ai/mxbai-rerank-xsmall-v1")
+    try:
+        model = CrossEncoder("mixedbread-ai/mxbai-rerank-xsmall-v1")
+    except Exception:
+        import os
+        os.environ["HF_HUB_OFFLINE"] = "1"
+        os.environ["TRANSFORMERS_OFFLINE"] = "1"
+        model = CrossEncoder("mixedbread-ai/mxbai-rerank-xsmall-v1")
 
     # Tạo các cặp đầu vào: (câu hỏi, nội dung tài liệu)
     pairs = [(query, c["content"]) for c in candidates]
@@ -151,7 +157,13 @@ def rerank(
         # Lấy model embedding từ Task 4 để sinh query_embedding phục vụ MMR
         from sentence_transformers import SentenceTransformer
         from src.task4_chunking_indexing import EMBEDDING_MODEL
-        model = SentenceTransformer(EMBEDDING_MODEL)
+        try:
+            model = SentenceTransformer(EMBEDDING_MODEL)
+        except Exception:
+            import os
+            os.environ["HF_HUB_OFFLINE"] = "1"
+            os.environ["TRANSFORMERS_OFFLINE"] = "1"
+            model = SentenceTransformer(EMBEDDING_MODEL)
         query_embedding = model.encode(query).tolist()
         return rerank_mmr(query_embedding, candidates, top_k)
     elif method == "rrf":
